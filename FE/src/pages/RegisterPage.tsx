@@ -4,25 +4,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMutation } from "@tanstack/react-query";
-import { FormEvent, useState } from "react";
+import { FormEvent,useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function RegisterPage() {
-  const [formData, setFormData] = useState({
+  const [formData,setFormData] = useState({
     email: '',
     password: '',
   });
 
   const handleInputChange = (e: any) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name,value } = e.target;
+    setFormData({ ...formData,[name]: value });
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     let formContent = new FormData(e.currentTarget)
-    formContent.append("password1", formData.password)
-    formContent.append("password2", formData.password)
+    formContent.append("password1",formData.password)
+    formContent.append("password2",formData.password)
 
     signUp.mutate(formContent)
     // Your custom submission logic here
@@ -30,17 +30,18 @@ export default function RegisterPage() {
 
   const signUp = useMutation({
     mutationFn: async (formData: FormData) => {
-      const res = await fetch("/api/sign_up", {
+      const res = await fetch("/api/sign_up",{
         method: "POST",
         body: formData
 
       })
       if (res.status != 200) {
-        if (res.status == 303) {
-          throw new Error("Credentials don't match, pls try again");
-        } else {
-          throw new Error("Pls try again later or contact support");
+        if (res.status == 400) {
+          let r = await res.json()
+          return r
         }
+        throw new Error("Pls try again later or contact support");
+
       }
       return res;
     }
@@ -58,12 +59,26 @@ export default function RegisterPage() {
             </Link>
           </div>
           <h1 className="self-center font-semibold text-xl mt-2">Sign Up</h1>
-          {/* <p className="">After register pls verify confirm your email</p> */}
           <form onSubmit={handleSubmit} >
             <Label className="mt-2">Email:</Label>
             <Input required={true} onChange={handleInputChange} name="email" type="email" className="mt-1"></Input>
+            {
+              signUp.data?.email?.map((message: string) => {
+                return <p key={message} className="text-red-500 text-sm ml-1 ">{message}</p>
+              })
+
+            }
+
             <Label className=" mt-2">Password:</Label>
             <Input required={true} onChange={handleInputChange} name="password" type="password" className="mt-1"></Input>
+
+            {
+              signUp.data?.password2?.map((message: string) => {
+
+                return <p key={message} className="text-red-500 text-sm ml-1 ">{message}</p>
+              })
+
+            }
             <Button type="submit" className="mt-2 w-full">
               Sign Up
             </Button>
