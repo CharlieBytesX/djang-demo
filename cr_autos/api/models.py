@@ -21,17 +21,17 @@ def custom_upload_to(_, filename):
 
 
 class AuthorManager(BaseUserManager):
-    def create_author(self, email, password) -> 'Author':
+    def create_author(self, email, password, **extra_fields) -> 'Author':
         if not email:
             raise ValueError('Email required')
         email = self.normalize_email(email)
-        user = self.model(email = email)
+        user = self.model(email = email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password) ->'Author':
-        user = self.create_author(email,password)
+    def create_superuser(self, email, password, **extra_fields) ->'Author':
+        user = self.create_author(email,password, **extra_fields)
         user.is_superuser = True
         user.is_staff = True
         user.save(using=self._db)
@@ -41,6 +41,7 @@ class AuthorManager(BaseUserManager):
 class Author(AbstractUser):
     email = models.EmailField(unique=True)
     is_email_confirmed = models.BooleanField(default=False)
+    username = None
 
     USERNAME_FIELD =("email")
     REQUIRED_FIELDS = [ 'password']
@@ -49,6 +50,8 @@ class Author(AbstractUser):
 
     def __str__(self):
         return self.email
+    def save(self, *args, **kwargs):
+        return super().save(*args, **kwargs)
 
 class EmailConfirmationToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
