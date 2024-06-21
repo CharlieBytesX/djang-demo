@@ -10,13 +10,14 @@ from .forms.user_sign_up import AuthorRegistrationForm
 
 
 from .serializers import PostSerializer
-from .models import (Post,EmailConfirmationToken)
-from django.core.exceptions import ObjectDoesNotExist
+from .models import ( TOKEN_EXTENSION, Post,EmailConfirmationToken,Author)
+from django.core.exceptions import  ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.conf import settings
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login 
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
+from django.shortcuts import redirect
 
 
 @api_view(["GET"])
@@ -31,17 +32,21 @@ def apiOverview(_:Request):
     return Response(api_urls)
 
 @api_view(["POST"])
-def register(request:Request):
+def register(request:HttpRequest):
     form = AuthorRegistrationForm(request.POST)
-    if form.is_valid():
-        new_user = form.save()
-        token =  get_random_string(32)
+    if (form.is_valid()):
+        new_user : Author = form.instance
+        new_user.is_active = False
+        new_user.save()
+
+        token =  get_random_string(TOKEN_EXTENSION)
         verification_token = EmailConfirmationToken()
         verification_token.token = token
         verification_token.user = new_user
         verification_token.save()
+        login(request,new_user)
 
-        verification_link = f"{settings.DOMAIN}/verify_account/{token}"
+        verification_link = f"{settings.DOMAIN}/api/verify_account/{token}"
 
         send_mail(
             subject="Confirm your CR account",
@@ -52,6 +57,33 @@ def register(request:Request):
     else:
         print(form.errors.as_json())
         return(Response(status=status.HTTP_400_BAD_REQUEST, data= form.errors ))
+
+
+@api_view(["GET"])
+def confirm_email(request:HttpRequest,token):
+
+    try:
+        email_token = EmailConfirmationToken.objects.get(token= token)
+        print(email_token)
+        author = email_token.user
+        author.is_active = True
+        author.is_email_confirmed = True
+        author.save()
+        login(request=request, user= author)
+        email_token.delete()
+
+        return redirect(to="/") 
+
+    except EmailConfirmationToken.DoesNotExist:
+        user = request.user
+        if user.is_active:
+            return redirect(to="/") 
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(e)
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    
 
 
 

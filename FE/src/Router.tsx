@@ -6,9 +6,10 @@ import MyPostsPage from "./pages/MyPostsPage";
 import RegisterPage from "./pages/RegisterPage";
 import EditCarPage from "./pages/editCar/EditCarPage";
 import LoginPage from "./pages/LoginPage";
+import RegisterSuccesfull from "./pages/RegisterSuccesfull";
 
 const queryClient = new QueryClient();
-function App() {
+function Router() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter basename="/">
@@ -18,6 +19,7 @@ function App() {
           <Route path="/create_post" element={<NewCarPost />} />
           <Route path="/sign_up" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/confirm_email" element={<RegisterSuccesfull />} />
 
           {/*Protected client routes */}
           <Route path="/edit_my_post/:id" element={<EditCarPage />} />
@@ -28,4 +30,4 @@ function App() {
   );
 }
 
-export default App;
+export default Router;

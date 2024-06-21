@@ -9,6 +9,7 @@ urlpatterns = [
     path("update_car_post/<str:pk>", views.update_car_post, name="post-update"),
     path("delete_car_post/<str:pk>", views.delete_car_post, name="post-delete"),
     path("create_car_post", views.create_post, name="post-create"),
+    path("verify_account/<str:token>", views.confirm_email, name="confirm-email"),
 
     path("sign_up", views.register, name="post-create"),
 ]

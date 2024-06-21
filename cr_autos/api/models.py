@@ -8,6 +8,7 @@ from django.db import models
 from typing import Final
 
 CAR_IMAGE_FOLDER: Final[str] = "car_images"
+TOKEN_EXTENSION: Final[int] = 32
 
 
 def custom_upload_to(_, filename):
@@ -24,6 +25,7 @@ class AuthorManager(BaseUserManager):
             raise ValueError('Email required')
         email = self.normalize_email(email)
         user = self.model(email = email, **extra_fields)
+        user.is_active = False
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -53,7 +55,7 @@ class Author(AbstractUser):
 
 class EmailConfirmationToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    token = models.CharField(max_length=32)
+    token = models.CharField(max_length=TOKEN_EXTENSION)
     user = models.ForeignKey(Author, on_delete=models.CASCADE)
 
 
