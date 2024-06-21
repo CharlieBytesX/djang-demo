@@ -12,8 +12,12 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 from django.conf.global_settings import APPEND_SLASH
+ 
+load_dotenv()
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -139,3 +143,15 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL="api.Author"
+DOMAIN ="http://127.0.0.1:8000"
+
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") 
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_PORT = os.getenv("EMAIL_PORT")
+
+
+DOMAIN=os.getenv("DOMAIN")

@@ -18,8 +18,6 @@ def custom_upload_to(_, filename):
     return filename
 
 
-
-
 class AuthorManager(BaseUserManager):
     def create_author(self, email, password, **extra_fields) -> 'Author':
         if not email:
@@ -55,6 +53,7 @@ class Author(AbstractUser):
 
 class EmailConfirmationToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
+    token = models.CharField(max_length=32)
     user = models.ForeignKey(Author, on_delete=models.CASCADE)
 
 

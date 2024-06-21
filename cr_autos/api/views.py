@@ -10,11 +10,13 @@ from .forms.user_sign_up import AuthorRegistrationForm
 
 
 from .serializers import PostSerializer
-from .models import Post
+from .models import (Post,EmailConfirmationToken)
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
+from django.utils.crypto import get_random_string
+from django.core.mail import send_mail
 
 
 @api_view(["GET"])
@@ -31,15 +33,26 @@ def apiOverview(_:Request):
 @api_view(["POST"])
 def register(request:Request):
     form = AuthorRegistrationForm(request.POST)
-    print(request.POST)
     if form.is_valid():
-        user = form.save()
-        print(user)
+        new_user = form.save()
+        token =  get_random_string(32)
+        verification_token = EmailConfirmationToken()
+        verification_token.token = token
+        verification_token.user = new_user
+        verification_token.save()
+
+        verification_link = f"{settings.DOMAIN}/verify_account/{token}"
+
+        send_mail(
+            subject="Confirm your CR account",
+            message=f"Pls verify your account clicking this link\n{verification_link} ",
+            from_email=settings.EMAIL_HOST_USER ,
+            recipient_list=[new_user.email])
+        return Response(OK)
     else:
         print(form.errors.as_json())
-        return(Response(status=status.HTTP_400_BAD_REQUEST, data= form.errors.as_json() ))
+        return(Response(status=status.HTTP_400_BAD_REQUEST, data= form.errors ))
 
-    return Response(OK)
 
 
 @api_view(["GET"])
