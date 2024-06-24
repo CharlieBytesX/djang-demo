@@ -14,28 +14,19 @@ from .models import ( TOKEN_EXTENSION, Post,EmailConfirmationToken,Author)
 from django.core.exceptions import  ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.conf import settings
-from django.contrib.auth import login 
+from django.contrib.auth import authenticate, login 
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
 from django.shortcuts import redirect
+from typing import cast
+from .decorators import require_confirmed_author
 
-
-@api_view(["GET"])
-def apiOverview(_:Request):
-    api_urls = {
-        "List": "/car_posts/",
-        "Detail View": "/car_posts/<str:pk>/",
-        "Create": "/car_posts/",
-        "Update": "/car_posts/<str:pk>/",
-        "Delete": "/car_posts/<str:pk>/",
-    }
-    return Response(api_urls)
 
 @api_view(["POST"])
 def register(request:HttpRequest):
     form = AuthorRegistrationForm(request.POST)
     if (form.is_valid()):
-        new_user : Author = form.instance
+        new_user : Author = form.save(commit=False)
         new_user.is_active = False
         new_user.save()
 

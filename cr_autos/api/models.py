@@ -20,9 +20,11 @@ def custom_upload_to(_, filename):
 
 
 class AuthorManager(BaseUserManager):
-    def create_author(self, email, password, **extra_fields) -> 'Author':
+    def create_user(self, email, password, **extra_fields) -> 'Author':
         if not email:
             raise ValueError('Email required')
+        if not password:
+            raise ValueError('Password required')
         email = self.normalize_email(email)
         user = self.model(email = email, **extra_fields)
         user.is_active = False
@@ -31,11 +33,9 @@ class AuthorManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password, **extra_fields) ->'Author':
-        user = self.create_author(email,password, **extra_fields)
-        user.is_superuser = True
-        user.is_staff = True
-        user.save(using=self._db)
-        return user
+        extra_fields.setdefault('is_staff',True)
+        extra_fields.setdefault('is_superuser',True)
+        return self.create_user(email,password,**extra_fields)
 
 
 class Author(AbstractUser):
