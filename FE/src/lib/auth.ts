@@ -34,14 +34,21 @@ class AuthManager {
   }
 
   public addAuthToRequest(request: RequestInit): RequestInit {
+    console.log(request.headers);
     let csfrToken = this.getCSFRToken();
-    let oldHeaders = new Headers(request.headers);
-    oldHeaders.append("X-CSRFToken", csfrToken);
+    // Initialize headers if not present
+    const headers = request.headers ? { ...request.headers } : {};
+    // Append the CSRF token with correct case
+    headers["X-CSRFToken"] = csfrToken;
+
+    // Debugging line to check headers
+    console.log("Headers after append:", headers);
     let result = {
       ...request,
-      headers: oldHeaders,
+      headers: headers,
       mode: "same-origin" as RequestMode,
     };
+    console.log(result);
     return result;
   }
 }

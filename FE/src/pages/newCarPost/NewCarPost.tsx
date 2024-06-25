@@ -5,11 +5,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import MainLayout from "@/layouts/MainLayout";
 import { BounceLoader } from "react-spinners";
-import { useNewCarPostLogic } from "./useNewCarPostLogic";
+import { useCarLogic } from "./useCarPostLogic";
 import PageTitle from "@/components/shared/PageTitle";
 
 export function NewCarPost() {
-  const logic = useNewCarPostLogic();
+  const logic = useCarLogic();
   return (
     <MainLayout>
       {logic.loading && (
@@ -29,13 +29,7 @@ export function NewCarPost() {
             }}
           />
           <PageTitle>New Car Post</PageTitle>
-          <form className=" mt-4" onSubmit={logic.handleSubmit}>
-            <input
-              hidden={true}
-              readOnly={true}
-              name="csrfmiddlewaretoken"
-              value={logic.csrfToken}
-            />
+          <form className=" mt-4" onSubmit={logic.handleCreateNewPost}>
             <section className="flex flex-1 flex-col gap-2">
               <Label htmlFor="title">Title:</Label>
               <Input
@@ -64,12 +58,12 @@ export function NewCarPost() {
               <Label htmlFor="contactNumber">Contact number:</Label>
               <Input
                 type={"tel"}
-                value={logic.content.contactNumber}
+                value={logic.content.contact_number}
                 minLength={8}
                 onChange={(e) =>
                   logic.handleChangeContactNumber(e.currentTarget.value)
                 }
-                name="contactNumber"
+                name="contact_number"
                 required={true}
               />
             </section>

@@ -64,13 +64,19 @@ export default function CarCard(props: Props) {
           <Edit
             className="hover:scale-150 transition-all hover:opacity-90 duration-300"
             size={20}
-            onClick={props.editButtonAction}
+            onClick={(e) => {
+              e.stopPropagation();
+              props.editButtonAction ? props.editButtonAction() : null;
+            }}
           />
         )}
         {props.showEraseButton && (
           <X
             className="hover:scale-150 duration-300 transition-all "
-            onClick={props.eraseButtonAction}
+            onClick={(e) => {
+              e.stopPropagation();
+              props.eraseButtonAction ? props.eraseButtonAction() : null;
+            }}
           />
         )}
       </div>

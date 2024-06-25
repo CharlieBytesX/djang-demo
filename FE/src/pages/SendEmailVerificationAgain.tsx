@@ -1,4 +1,4 @@
-import { DialogHelper } from "@/components/dialogs/AlertDialog";
+import { DialogHelper } from "@/components/dialogs/DialogHelper";
 import Loader from "@/components/shared/Loader";
 import Logo from "@/components/shared/Logo";
 import { Button } from "@/components/ui/button";

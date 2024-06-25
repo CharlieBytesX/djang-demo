@@ -1,5 +1,5 @@
 
-from http.client import OK, UNAUTHORIZED
+from http.client import OK
 import os
 from rest_framework.decorators import api_view
 from rest_framework.request import HttpRequest, Request
@@ -14,7 +14,7 @@ from .models import ( TOKEN_EXTENSION, Post,EmailConfirmationToken,Author)
 from django.core.exceptions import  ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.conf import settings
-from django.contrib.auth import authenticate, login, logout 
+from django.contrib.auth import  login, logout 
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
 from django.shortcuts import redirect
@@ -115,11 +115,8 @@ def list_car_posts(request:Request):
 @api_view(["GET"])
 @require_confirmed_author
 def list_my_car_posts(request:HttpRequest):
-    if not request.user.is_authenticated:
-        return Response(status=UNAUTHORIZED)
-    
-    print(request.user)
-    posts = Post.objects.all()
+    author= request.user
+    posts = Post.objects.filter(author=author)
     serializer = PostSerializer(posts, many=True)
     return Response(serializer.data)
 
@@ -134,20 +131,9 @@ def car_post_details(_:Request, pk):
 @api_view(["POST"])
 @require_confirmed_author
 def update_car_post(request, pk):
-
-    if not request.user.is_authenticated:
-        return Response(status=UNAUTHORIZED)
+    author = request.user
 
     try:
-        title: str = request.POST.get("title")
-        description: str = request.POST.get("description")
-        image_file = request.FILES.get("image")
-
-        if not title or not description or not image_file:
-            return Response(
-                {"error": "Missing title, description or image"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         try:
             post = Post.objects.get(id=pk)
@@ -156,16 +142,35 @@ def update_car_post(request, pk):
                 {"error": "Car post does not exist"},
                 status=status.HTTP_404_NOT_FOUND,
             )
+        if  not (post.author == author):
+            print(post.author)
+            print(author)
+            return Response(
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        title: str = request.POST.get("title")
+        description: str = request.POST.get("description")
+        contact_number: str = request.POST.get("contact_number")
+        price: str = request.POST.get("price")
+        image_file = request.FILES.get("image")
+
 
         # Delete the old image file
-        if post.car_image:
+        if image_file:
             old_image_path = os.path.join(settings.MEDIA_ROOT, str(post.car_image))
             if default_storage.exists(old_image_path):
                 default_storage.delete(old_image_path)
+            post.car_image = image_file
+        if title:
+            post.title = title
+        if price:
+            post.price = float(price)
+        if description:
+            post.description = description
+        if contact_number:
+            post.contact_number = contact_number
 
-        post.title = title
-        post.description = description
-        post.car_image = image_file
         post.save()
 
         serializer = PostSerializer(instance=post, data=request.data)
@@ -175,16 +180,22 @@ def update_car_post(request, pk):
     except Exception as e:
         print(e)
         return Response(
-            {"error": "Internal server error"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
 
 @api_view(["DELETE"])
-def delete_car_post(_, pk):
-    post = Post.objects.get(id=pk)
-    post.delete()
-    return Response("Delete car post successfully")
+def delete_car_post(request:HttpRequest, pk):
+    user = request.user
+    try:
+        post = Post.objects.get(id=pk)
+        if not(post.author == user):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        post.delete()
+        return Response(status=status.HTTP_200_OK)
+
+    except Exception :
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(["GET"])
@@ -227,8 +238,6 @@ def sign_in(request:HttpRequest):
     except Author.DoesNotExist :
          return Response(status= status.HTTP_401_UNAUTHORIZED, data="Invalid Credentials")
 
-    # login(request,user)
-    # user = cast(Author,user)
 
 
 @api_view(["POST"])
@@ -236,9 +245,14 @@ def create_post(request:HttpRequest):
     try:
         title = request.POST.get("title")
         description = request.POST.get("description")
-        contact_number = request.POST.get("contactNumber")
+        contact_number = request.POST.get("contact_number")
         price = request.POST.get("price")
         image_file = request.FILES.get("image")
+        print(title)
+        print(description)
+        print(contact_number)
+        print(price)
+        print(image_file)
 
         if not title or not description or not image_file or not price or not contact_number:
             return Response(
@@ -246,7 +260,7 @@ def create_post(request:HttpRequest):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        user = request.user
+        user = cast(Author,request.user)
         # New post
         new_post = Post()
         new_post.title = title

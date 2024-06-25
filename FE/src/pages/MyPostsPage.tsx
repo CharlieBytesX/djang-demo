@@ -1,41 +1,52 @@
 import CarCard, { type CardAd } from "@/components/shared/CarCard";
 import PageTitle from "@/components/shared/PageTitle";
 import MainLayout from "@/layouts/MainLayout";
-import { useEffect, useState } from "react";
+import { authManager } from "@/lib/auth";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { RiseLoader } from "react-spinners";
 
 export default function MyPostsPage() {
-  const [myPosts, setMyPosts] = useState([]);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { isPending, data } = useQuery({
+    queryKey: ["my_car_posts"],
+    queryFn: async () => {
+      const reponse = await fetch("/api/list_my_car_posts");
+      const bodyJson = await reponse.json();
+      return bodyJson;
+    },
+  });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const reponse = await fetch("/api/list_my_car_posts");
-        const bodyJson = await reponse.json();
-        setMyPosts(bodyJson);
-      } catch (error) {
-        console.log(error);
+  const deletePost = useMutation({
+    mutationFn: async (id: number) => {
+      if (!confirm("Are you sure that you want to eliminate this post? ")) {
+        return;
       }
-
-      setLoading(false);
-    };
-    fetchData();
-  }, []);
+      const response = await fetch(
+        `/api/delete_car_post/${id}`,
+        authManager.addAuthToRequest({
+          method: "DELETE",
+        }),
+      );
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ["my_car_posts"] });
+        return "ok";
+      }
+      throw new Error("Unexpected Error");
+    },
+  });
 
   return (
     <MainLayout>
       <PageTitle>My Car Posts</PageTitle>
-      {loading && (
+      {isPending && (
         <RiseLoader className="mx-auto my-auto" color="darkturquoise" />
       )}
 
-      {!loading && (
+      {!isPending && (
         <div className="flex-1 mt-4 flex flex-wrap gap-2 pb-2 ">
-          {myPosts.map((ad: CardAd) => {
+          {data.map((ad: CardAd) => {
             return (
               <CarCard
                 key={ad.id}
@@ -44,7 +55,9 @@ export default function MyPostsPage() {
                 editButtonAction={() => {
                   navigate(`/edit_my_post/${ad.id}`);
                 }}
-                eraseButtonAction={() => {}}
+                eraseButtonAction={() => {
+                  deletePost.mutate(ad.id);
+                }}
                 clickCardAction={() => {
                   navigate(`/post/${ad.id}`);
                 }}
