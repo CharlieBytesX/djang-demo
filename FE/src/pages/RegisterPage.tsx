@@ -90,7 +90,11 @@ export default function RegisterPage() {
                 </p>
               );
             })}
-            <Button type="submit" className="mt-2 w-full">
+            <Button
+              disabled={signUp.isPending}
+              type="submit"
+              className="mt-2 w-full"
+            >
               Sign Up
             </Button>
           </form>

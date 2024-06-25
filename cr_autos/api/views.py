@@ -14,7 +14,7 @@ from .models import ( TOKEN_EXTENSION, Post,EmailConfirmationToken,Author)
 from django.core.exceptions import  ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.conf import settings
-from django.contrib.auth import authenticate, login 
+from django.contrib.auth import authenticate, login, logout 
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
 from django.shortcuts import redirect
@@ -27,7 +27,7 @@ def register(request:HttpRequest):
     form = AuthorRegistrationForm(request.POST)
     if (form.is_valid()):
         new_user : Author = form.save(commit=False)
-        new_user.is_active = False
+        new_user.is_active = True
         new_user.save()
 
         token =  get_random_string(TOKEN_EXTENSION)
@@ -77,6 +77,33 @@ def confirm_email(request:HttpRequest,token):
     
 
 
+@api_view(["POST"])
+# Always will be returning with 200 because this will prevent an atacker to know the valid emails 
+def resend_email(request:HttpRequest):
+    email = request.POST.get("email")
+    try:
+        user = Author.objects.get(email=email)
+        if not user.is_email_confirmed:
+            token =  get_random_string(TOKEN_EXTENSION)
+            verification_token = EmailConfirmationToken.objects.get(user=user)
+            verification_token.token = token
+            verification_token.save()
+            login(request,user)
+
+            verification_link = f"{settings.DOMAIN}/api/verify_account/{token}"
+
+            send_mail(
+                subject="Confirm your CR account",
+                message=f"Pls verify your account clicking this link\n{verification_link} ",
+                from_email=settings.EMAIL_HOST_USER ,
+                recipient_list=[user.email])
+
+        return Response(status=status.HTTP_200_OK )
+    except Author.DoesNotExist: 
+        return Response(status=status.HTTP_200_OK )
+
+
+
 
 @api_view(["GET"])
 def list_car_posts(request:Request):
@@ -86,6 +113,7 @@ def list_car_posts(request:Request):
     return Response(serializer.data)
 
 @api_view(["GET"])
+@require_confirmed_author
 def list_my_car_posts(request:HttpRequest):
     if not request.user.is_authenticated:
         return Response(status=UNAUTHORIZED)
@@ -104,7 +132,12 @@ def car_post_details(_:Request, pk):
 
 
 @api_view(["POST"])
+@require_confirmed_author
 def update_car_post(request, pk):
+
+    if not request.user.is_authenticated:
+        return Response(status=UNAUTHORIZED)
+
     try:
         title: str = request.POST.get("title")
         description: str = request.POST.get("description")
@@ -152,6 +185,50 @@ def delete_car_post(_, pk):
     post = Post.objects.get(id=pk)
     post.delete()
     return Response("Delete car post successfully")
+
+
+@api_view(["GET"])
+def im_logged_in(request:HttpRequest):
+    user =  cast(Author,request.user)
+    if user == None or not user.is_active:
+        return Response(status=status.HTTP_401_UNAUTHORIZED )
+    elif (not user.is_email_confirmed):
+        return Response(status=status.HTTP_403_FORBIDDEN )
+
+    return Response(status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def sign_out(request:HttpRequest):
+    try:
+        logout(request)
+        return Response(status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(["POST"])
+def sign_in(request:HttpRequest):
+    email = request.POST.get("email")
+    password = request.POST.get("password")
+    print(email)
+    print(password)
+    try:
+        user = Author.objects.get(email=email)
+        if  not user.check_password(password):
+            return Response(status= status.HTTP_401_UNAUTHORIZED, data="Invalid Credentials")
+        if not user.is_active:
+            return Response(status= status.HTTP_401_UNAUTHORIZED, data="Invalid Credentials")
+        if not user.is_email_confirmed:
+            return Response(status=status.HTTP_403_FORBIDDEN, data="Pls confirm email before login")
+
+        login(request=request, user= user)
+        return Response(status= status.HTTP_200_OK)
+    except Author.DoesNotExist :
+         return Response(status= status.HTTP_401_UNAUTHORIZED, data="Invalid Credentials")
+
+    # login(request,user)
+    # user = cast(Author,user)
 
 
 @api_view(["POST"])
