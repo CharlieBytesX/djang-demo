@@ -1,38 +1,6 @@
+import { formatPrice, formatTelephoneNumber } from "@/lib/format";
 import { Edit, X } from "lucide-react";
 
-function formatPrice(priceN: number) {
-  const price = priceN.toString();
-  const splittedOnComma = price.split(",");
-  const beforeComma = splittedOnComma[0];
-  const afterComma = splittedOnComma[1];
-
-  let lastCharIndexAdded = beforeComma.length;
-  const chunks: string[] = [];
-
-  for (let index = beforeComma.length - 1; index >= 0; index--) {
-    if ((index + 1) % 3 === 0) {
-      chunks.push(beforeComma.substring(index, lastCharIndexAdded));
-      lastCharIndexAdded = index;
-    }
-  }
-
-  if (lastCharIndexAdded !== 0) {
-    chunks.push(beforeComma.substring(0, lastCharIndexAdded));
-  }
-
-  let newPrice = "";
-  for (let index = chunks.length - 1; index >= 0; index--) {
-    newPrice += chunks[index];
-    if (index !== 0) {
-      newPrice += ".";
-    }
-  }
-  if (afterComma) {
-    newPrice += `,${afterComma}`;
-  }
-
-  return newPrice;
-}
 export interface CardAd {
   title: string;
   id: number;
@@ -86,7 +54,9 @@ export default function CarCard(props: Props) {
       <span className=" text-green-400 font-semibold overflow-ellipsis">
         ₡ {formatPrice(props.ad.price)}
       </span>
-      <span className="">Contact: {props.ad.contact_number}</span>
+      <span className="">
+        Contact: {formatTelephoneNumber(props.ad.contact_number)}
+      </span>
     </div>
   );
 }
