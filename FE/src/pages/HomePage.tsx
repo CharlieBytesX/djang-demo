@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { RiseLoader } from "react-spinners";
 
 import MainLayout from "../layouts/MainLayout";
@@ -8,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 export function HomePage() {
-  const [page, setPage] = useState(1);
+  // const [page, setPage] = useState(1);
   const navigate = useNavigate();
   const { data, isPending } = useQuery({
     queryKey: ["load_posts"],

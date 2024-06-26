@@ -37,7 +37,7 @@ class AuthManager {
     console.log(request.headers);
     let csfrToken = this.getCSFRToken();
     // Initialize headers if not present
-    const headers = request.headers ? { ...request.headers } : {};
+    const headers: any = request.headers ? { ...request.headers } : {};
     // Append the CSRF token with correct case
     headers["X-CSRFToken"] = csfrToken;
 
