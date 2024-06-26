@@ -14,7 +14,6 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-from django.conf.global_settings import APPEND_SLASH
  
 load_dotenv()
 
@@ -51,10 +50,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework",
-    "api.apps.ApiConfig",
+    "posts.apps.PostsConfig",
+    "custom_auth.apps.CustomAuthConfig",
 ]
 
-CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:5173", "http://localhost:5173"]
+CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:5173", "http://localhost:5174"]
 CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
 
 
@@ -142,8 +142,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL="api.Author"
-DOMAIN ="http://127.0.0.1:8000"
+AUTH_USER_MODEL="custom_auth.Author"
+DOMAIN=os.getenv("DOMAIN")
 
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
@@ -154,4 +154,3 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_PORT = os.getenv("EMAIL_PORT")
 
 
-DOMAIN=os.getenv("DOMAIN")
