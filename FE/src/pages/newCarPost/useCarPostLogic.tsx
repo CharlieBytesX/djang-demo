@@ -34,7 +34,6 @@ export const useCarLogic = () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/list_car_post/${id}`);
-      console.log(response);
       if (response.ok) {
         const jsonBody = await response.json();
         setContent({
@@ -47,7 +46,6 @@ export const useCarLogic = () => {
         });
       }
     } catch (error) {
-      console.log(error);
       setLoading(false);
     }
   };
@@ -110,7 +108,6 @@ export const useCarLogic = () => {
         setError("Error creating post");
       }
     } catch (error) {
-      console.log(error);
       setLoading(false);
       setError("Error creating post");
     }
@@ -138,7 +135,6 @@ export const useCarLogic = () => {
         setError("Error updating post");
       }
     } catch (error) {
-      console.log(error);
       setLoading(false);
       setError("Error updating post");
     }

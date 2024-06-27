@@ -13,7 +13,6 @@ export default function CarPostPage() {
       const res = await fetch(`/api/list_car_post/${id}`);
       if (res.ok) {
         const car = await res.json();
-        console.log(car);
         return car;
       }
       throw new Error("unexpected error");

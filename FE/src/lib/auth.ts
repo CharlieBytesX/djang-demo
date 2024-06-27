@@ -36,7 +36,6 @@ class AuthManager {
   }
 
   public addAuthToRequest(request: RequestInit): RequestInit {
-    console.log(request.headers);
     let csfrToken = this.getCSFRToken();
     // Initialize headers if not present
     const headers: any = request.headers ? { ...request.headers } : {};
@@ -44,13 +43,11 @@ class AuthManager {
     headers["X-CSRFToken"] = csfrToken;
 
     // Debugging line to check headers
-    console.log("Headers after append:", headers);
     let result = {
       ...request,
       headers: headers,
       mode: "same-origin" as RequestMode,
     };
-    console.log(result);
     return result;
   }
 }
