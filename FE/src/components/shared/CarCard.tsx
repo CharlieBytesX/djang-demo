@@ -51,7 +51,7 @@ export default function CarCard(props: Props) {
 
       <img alt="" className="  h-40 object-contain" src={props.ad.car_image} />
       <span className="truncate h-7">{props.ad.description}</span>
-      <span className=" text-green-400 font-semibold overflow-ellipsis">
+      <span className=" text-green-400 font-semibold overflow-ellipsis overflow-clip whitespace-nowrap">
         ₡ {formatPrice(props.ad.price)}
       </span>
       <span className="">

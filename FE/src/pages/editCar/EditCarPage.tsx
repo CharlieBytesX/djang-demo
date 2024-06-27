@@ -85,7 +85,7 @@ export default function EditCarPage() {
           <Label htmlFor="description">Car Image:</Label>
           <Input
             ref={logic.fileInputRef}
-            name="image"
+            name="car_image"
             onChange={logic.handleImageChange}
             className=""
             type="file"

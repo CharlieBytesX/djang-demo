@@ -85,7 +85,7 @@ export function NewCarPost() {
               <Label htmlFor="description">Car Image:</Label>
               <Input
                 ref={logic.fileInputRef}
-                name="image"
+                name="car_image"
                 required={true}
                 onChange={logic.handleImageChange}
                 className=""
