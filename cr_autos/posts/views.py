@@ -77,13 +77,12 @@ def update_car_post(request, pk):
         if contact_number:
             post.contact_number = contact_number
 
-        post.save()
 
-        serializer = PostSerializer(instance=post, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        serializer = PostSerializer(instance=post)
+        post.save()
         return Response(serializer.data)
-    except Exception:
+    except Exception as e:
+        print(e)
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
         )
