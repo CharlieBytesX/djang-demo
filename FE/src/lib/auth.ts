@@ -9,11 +9,13 @@ class AuthManager {
   }
 
   // Ask the server on init so this will work with http only cookies, jwt...
-  private async askServerIfImLoggedIn() {
+  public async askServerIfImLoggedIn(): Promise<boolean> {
     const res = await fetch("/api/im_logged_in");
     if (res.ok) {
       this.isLoggedIn.set(true);
+      return true;
     }
+    return false;
   }
   private getCSFRToken() {
     const cookies = document.cookie.split(";");

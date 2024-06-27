@@ -5,6 +5,7 @@ import CarCard, { type CardAd } from "@/components/shared/CarCard";
 import PageTitle from "@/components/shared/PageTitle";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { authManager } from "@/lib/auth";
 
 export function HomePage() {
   // const [page, setPage] = useState(1);
@@ -12,6 +13,7 @@ export function HomePage() {
   const { data, isPending } = useQuery({
     queryKey: ["load_posts"],
     queryFn: async () => {
+      await authManager.askServerIfImLoggedIn();
       const response = await fetch("/api/list_car_post");
       const content = await response.json();
       if (response.ok) {
