@@ -56,6 +56,7 @@ def update_car_post(request, pk):
 
         data = request.data.copy()
         image_on_request = True
+        old_image = post.car_image.name
         if 'car_image' in data and not data['car_image']:
             image_on_request = False
             data.pop('car_image')
@@ -63,8 +64,7 @@ def update_car_post(request, pk):
         if serializer.is_valid():
             serializer.save()
             if image_on_request:
-                image_file = post.car_image.name
-                delete_car_image(image_file)
+                delete_car_image(old_image)
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )  
