@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres
+    volumes:
+      - db_data_dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      PG_NAME: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+volumes:
+  db_data_dev:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "$PWD/postgres_data_dev"
