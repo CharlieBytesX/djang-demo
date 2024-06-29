@@ -8,6 +8,10 @@ CR Autos-like app, for demoing Django and React knowledge.
 ![image](https://github.com/CharlieBytesX/djang-demo/assets/62361574/eaeef2e3-5fe9-4b60-85db-b6fdeef5b1be)
 ![image](https://github.com/CharlieBytesX/djang-demo/assets/62361574/dda0674d-d8d0-43ac-ae56-d75cd0931885)
 
+## Features
+- Extended authentication with email confirmation.
+- Post authorization per user.
+- Car post with images.
 
 ## Repository Structure
 
