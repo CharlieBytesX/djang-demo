@@ -8,7 +8,7 @@ import { RiseLoader } from "react-spinners";
 export default function CarPostPage() {
   const { id } = useParams();
   const { isPending, data } = useQuery({
-    queryKey: ["load_car_post_by_id"],
+    queryKey: [`load_car_post_by_id/${id}`],
     queryFn: async () => {
       const res = await fetch(`/api/list_car_post/${id}`);
       if (res.ok) {
