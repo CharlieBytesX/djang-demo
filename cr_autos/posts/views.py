@@ -55,14 +55,14 @@ def update_car_post(request, pk):
 
 
         data = request.data.copy()
-        no_image_on_req = False
+        image_on_request = True
         if 'car_image' in data and not data['car_image']:
-            no_image_on_req = True
+            image_on_request = False
             data.pop('car_image')
         serializer = PostSerializer(post,data=data, context ={'author':request.user}, partial=True)
         if serializer.is_valid():
             serializer.save()
-            if no_image_on_req:
+            if image_on_request:
                 image_file = post.car_image.name
                 delete_car_image(image_file)
             return Response(
